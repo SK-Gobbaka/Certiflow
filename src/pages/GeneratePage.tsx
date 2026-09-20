@@ -46,7 +46,7 @@ export default function GeneratePage() {
         const participant = validParticipants[i]
         
         const pdfDoc = await PDFDocument.create()
-        const font = await embedSelectedFont(pdfDoc, ev.templateFont || 'Helvetica-Bold')
+        const font = await embedSelectedFont(pdfDoc, ev!.templateFont || 'Helvetica-Bold')
         
         const img = isPng ? await pdfDoc.embedPng(imageBytes) : await pdfDoc.embedJpg(imageBytes)
         

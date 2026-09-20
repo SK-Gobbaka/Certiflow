@@ -19,7 +19,6 @@ export default function SendPage() {
   if (!ev) return null
 
   const validParticipants = (ev.participants || []).filter((p) => p.status === 'valid')
-  const receiversList = validParticipants.map(p => p.email).join(', ')
 
   async function startSending() {
     if (!token) {
@@ -48,7 +47,7 @@ export default function SendPage() {
         
         // Generate PDF for this participant
         const pdfDoc = await PDFDocument.create()
-        const font = await embedSelectedFont(pdfDoc, ev.templateFont || 'Helvetica-Bold')
+        const font = await embedSelectedFont(pdfDoc, ev!.templateFont || 'Helvetica-Bold')
         
         const img = isPng ? await pdfDoc.embedPng(imageBytes) : await pdfDoc.embedJpg(imageBytes)
         const { width, height } = img.scale(1)
@@ -70,14 +69,14 @@ export default function SendPage() {
         const pdfBytes = await pdfDoc.save()
 
         // Construct email
-        const personalizedBody = (ev.emailBody || '')
+        const personalizedBody = (ev!.emailBody || '')
           .replace(/{{name}}/g, participant.name)
           .replace(/{{email}}/g, participant.email)
           .replace(/{{role}}/g, participant.role || '');
 
         const rawMsg = createMimeMessage(
           participant.email,
-          ev.emailSubject || `Your Certificate for ${ev.name}`,
+          ev!.emailSubject || `Your Certificate for ${ev!.name}`,
           personalizedBody,
           pdfBytes,
           `${participant.name.replace(/[^a-z0-9]/gi, '_')}_Certificate.pdf`
