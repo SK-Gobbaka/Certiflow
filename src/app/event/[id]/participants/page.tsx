@@ -1,10 +1,12 @@
+'use client'
+
 import { useMemo, useRef, useState } from 'react'
 import type { DragEvent } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useParams, useRouter } from 'next/navigation'
 import { saveAs } from 'file-saver'
-import { useStore } from '../lib/store'
-import { parseParticipants, SAMPLE_CSV } from '../lib/validate'
-import type { RowStatus } from '../types'
+import { useStore } from '../../../../lib/store'
+import { parseParticipants, SAMPLE_CSV } from '../../../../lib/validate'
+import type { RowStatus } from '../../../../types'
 
 type Filter = 'all' | RowStatus
 
@@ -15,9 +17,10 @@ const badge: Record<RowStatus, string> = {
 }
 
 export default function ParticipantsPage() {
-  const { id = '' } = useParams()
+  const router = useRouter()
+  const params = useParams() || {}
+  const id = Array.isArray(params.id) ? params.id[0] : params.id || ''
   const { getEvent, updateEvent } = useStore()
-  const navigate = useNavigate()
   const ev = getEvent(id)
   const input = useRef<HTMLInputElement>(null)
   const [error, setError] = useState('')
@@ -161,7 +164,7 @@ export default function ParticipantsPage() {
           <div className="mt-6 flex justify-end">
             <button
               disabled={counts.valid === 0}
-              onClick={() => navigate('../certificate')}
+              onClick={() => router.push(`/event/${id}/certificate`)}
               className="rounded-md bg-seal px-5 py-2.5 text-sm font-semibold text-white hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
             >
               Continue to certificate design

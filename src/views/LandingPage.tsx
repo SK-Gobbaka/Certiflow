@@ -1,3 +1,5 @@
+'use client'
+
 import { useGoogleLogin } from '@react-oauth/google'
 import { useStore } from '../lib/store'
 

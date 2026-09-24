@@ -1,10 +1,13 @@
-import { useNavigate, useParams } from 'react-router-dom'
-import { useStore } from '../lib/store'
+'use client'
+
+import { useParams, useRouter } from 'next/navigation'
+import { useStore } from '../../../../lib/store'
 
 export default function ReviewPage() {
-  const { id = '' } = useParams()
+  const router = useRouter()
+  const params = useParams() || {}
+  const id = Array.isArray(params.id) ? params.id[0] : params.id || ''
   const { getEvent } = useStore()
-  const navigate = useNavigate()
   const ev = getEvent(id)
 
   if (!ev) return null
@@ -42,7 +45,7 @@ export default function ReviewPage() {
         <div className="rounded-lg border border-line bg-paper p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-bold text-ink">Participants</h3>
-            <button onClick={() => navigate('../participants')} className="text-seal text-sm font-medium hover:underline">
+            <button onClick={() => router.push(`/event/${id}/participants`)} className="text-seal text-sm font-medium hover:underline">
               Edit
             </button>
           </div>
@@ -55,7 +58,7 @@ export default function ReviewPage() {
         <div className="rounded-lg border border-line bg-paper p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-bold text-ink">Certificate Template</h3>
-            <button onClick={() => navigate('../certificate')} className="text-seal text-sm font-medium hover:underline">
+            <button onClick={() => router.push(`/event/${id}/certificate`)} className="text-seal text-sm font-medium hover:underline">
               Edit
             </button>
           </div>
@@ -71,7 +74,7 @@ export default function ReviewPage() {
         <div className="rounded-lg border border-line bg-paper p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-bold text-ink">Email Details</h3>
-            <button onClick={() => navigate('../email')} className="text-seal text-sm font-medium hover:underline">
+            <button onClick={() => router.push(`/event/${id}/email`)} className="text-seal text-sm font-medium hover:underline">
               Edit
             </button>
           </div>
@@ -92,13 +95,13 @@ export default function ReviewPage() {
 
       <div className="mt-8 flex justify-end gap-3">
         <button
-          onClick={() => navigate('../email')}
+          onClick={() => router.push(`/event/${id}/email`)}
           className="rounded-md border border-line px-5 py-2.5 text-sm font-medium hover:border-ink"
         >
           Back
         </button>
         <button
-          onClick={() => navigate('../generate')}
+          onClick={() => router.push(`/event/${id}/generate`)}
           disabled={validCount === 0 || !ev.template}
           className="rounded-md bg-seal px-5 py-2.5 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed"
         >

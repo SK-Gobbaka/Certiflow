@@ -1,15 +1,18 @@
-import { useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+'use client'
+
+import { useEffect, useRef, useState } from 'react'
+import { useParams, useRouter } from 'next/navigation'
 import { PDFDocument, rgb } from 'pdf-lib'
 import JSZip from 'jszip'
 import { saveAs } from 'file-saver'
-import { useStore } from '../lib/store'
-import { embedSelectedFont } from '../lib/fonts'
+import { useStore } from '../../../../lib/store'
+import { embedSelectedFont } from '../../../../lib/fonts'
 
 export default function GeneratePage() {
-  const { id = '' } = useParams()
+  const router = useRouter()
+  const params = useParams() || {}
+  const id = Array.isArray(params.id) ? params.id[0] : params.id || ''
   const { getEvent } = useStore()
-  const navigate = useNavigate()
   const ev = getEvent(id)
 
   const [generating, setGenerating] = useState(false)
@@ -146,13 +149,13 @@ export default function GeneratePage() {
 
       <div className="mt-8 flex justify-end gap-3">
         <button
-          onClick={() => navigate('../review')}
+          onClick={() => router.push(`/event/${id}/review`)}
           className="rounded-md border border-line px-5 py-2.5 text-sm font-medium hover:border-ink"
         >
           Back
         </button>
         <button
-          onClick={() => navigate('../send')}
+          onClick={() => router.push(`/event/${id}/send`)}
           disabled={!zipBlob}
           className="rounded-md bg-seal px-5 py-2.5 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed"
         >

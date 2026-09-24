@@ -1,4 +1,6 @@
-import { Link } from 'react-router-dom'
+'use client'
+
+import Link from 'next/link'
 import { useGoogleLogin, googleLogout } from '@react-oauth/google'
 import { useStore } from '../lib/store'
 
@@ -19,7 +21,7 @@ export default function TopBar() {
   return (
     <header className="border-b border-line bg-paper">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-5">
-        <Link to="/" className="flex items-center">
+        <Link href="/" className="flex items-center">
           <img src="/logo.png" alt="CertiFlow Logo" className="h-8 w-auto" />
         </Link>
         <div>

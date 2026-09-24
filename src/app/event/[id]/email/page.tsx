@@ -1,10 +1,13 @@
-import { useNavigate, useParams } from 'react-router-dom'
-import { useStore } from '../lib/store'
+'use client'
+
+import { useParams, useRouter } from 'next/navigation'
+import { useStore } from '../../../../lib/store'
 
 export default function EmailPage() {
-  const { id = '' } = useParams()
+  const router = useRouter()
+  const params = useParams() || {}
+  const id = Array.isArray(params.id) ? params.id[0] : params.id || ''
   const { getEvent, updateEvent } = useStore()
-  const navigate = useNavigate()
   const ev = getEvent(id)
 
   if (!ev) return null
@@ -51,7 +54,7 @@ export default function EmailPage() {
 
       <div className="mt-6 flex justify-end gap-3">
         <button
-          onClick={() => navigate('../certificate')}
+          onClick={() => router.push(`/event/${id}/certificate`)}
           className="rounded-md border border-line px-5 py-2.5 text-sm font-medium hover:border-ink"
         >
           Back
@@ -60,7 +63,7 @@ export default function EmailPage() {
           onClick={() => {
             if (!ev.emailSubject) updateEvent(id, { emailSubject: subject })
             if (!ev.emailBody) updateEvent(id, { emailBody: body })
-            navigate('../review')
+            router.push(`/event/${id}/review`)
           }}
           className="rounded-md bg-seal px-5 py-2.5 text-sm font-semibold text-white hover:brightness-110"
         >

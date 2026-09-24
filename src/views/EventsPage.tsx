@@ -1,6 +1,9 @@
+'use client'
+
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useStore } from '../lib/store'
 
 const field =
@@ -8,7 +11,7 @@ const field =
 
 export default function EventsPage() {
   const { events, createEvent, deleteEvent } = useStore()
-  const navigate = useNavigate()
+  const router = useRouter()
   const [open, setOpen] = useState(events.length === 0)
   const [form, setForm] = useState({ name: '', date: '', organizer: '', description: '' })
 
@@ -19,7 +22,7 @@ export default function EventsPage() {
     e.preventDefault()
     if (!form.name.trim()) return
     const id = createEvent({ ...form, name: form.name.trim() })
-    navigate(`/event/${id}/participants`)
+    router.push(`/event/${id}/participants`)
   }
 
   return (
@@ -76,7 +79,7 @@ export default function EventsPage() {
             const valid = ev.participants.filter((p) => p.status === 'valid').length
             return (
               <li key={ev.id} className="flex items-center justify-between gap-4 px-5 py-4">
-                <Link to={`/event/${ev.id}`} className="min-w-0 flex-1">
+                <Link href={`/event/${ev.id}`} className="min-w-0 flex-1">
                   <div className="truncate font-display text-lg font-bold">{ev.name}</div>
                   <div className="text-sm text-muted">
                     {[ev.organizer, ev.date].filter(Boolean).join(', ') || 'No details yet'}
