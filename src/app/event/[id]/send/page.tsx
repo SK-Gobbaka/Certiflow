@@ -2,10 +2,10 @@
 
 import { useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { PDFDocument, rgb } from 'pdf-lib'
+import { PDFDocument } from 'pdf-lib'
 import { useStore } from '../../../../lib/store'
 import { createMimeMessage } from '../../../../lib/email'
-import { embedSelectedFont } from '../../../../lib/fonts'
+import { drawCertificate, getDefaultCertificateStyle } from '../../../../lib/certificate'
 
 export default function SendPage() {
   const router = useRouter()
@@ -38,9 +38,8 @@ export default function SendPage() {
     setError(null)
 
     try {
-      // Parse template image type
-      const isPng = ev?.template?.startsWith('data:image/png')
-      const isJpg = ev?.template?.startsWith('data:image/jpeg') || ev?.template?.startsWith('data:image/jpg')
+      const isPng = Boolean(ev?.template?.startsWith('data:image/png'))
+      const isJpg = Boolean(ev?.template?.startsWith('data:image/jpeg') || ev?.template?.startsWith('data:image/jpg'))
       
       if (!isPng && !isJpg) {
         throw new Error("Unsupported image format. Please use a PNG or JPG template.")
@@ -48,6 +47,7 @@ export default function SendPage() {
 
       const res = await fetch(ev!.template!)
       const imageBytes = await res.arrayBuffer()
+      const certStyle = getDefaultCertificateStyle(ev!)
       
       for (let i = 0; i < validParticipants.length; i++) {
         const participant = validParticipants[i]
@@ -55,25 +55,7 @@ export default function SendPage() {
         try {
           // Generate PDF for this participant
           const pdfDoc = await PDFDocument.create()
-          const font = await embedSelectedFont(pdfDoc, ev!.templateFont || 'Helvetica-Bold')
-          
-          const img = isPng ? await pdfDoc.embedPng(imageBytes) : await pdfDoc.embedJpg(imageBytes)
-          const { width, height } = img.scale(1)
-          const page = pdfDoc.addPage([width, height])
-          
-          page.drawImage(img, { x: 0, y: 0, width, height })
-          
-          const fontSize = Math.max(24, height * 0.08)
-          const textWidth = font.widthOfTextAtSize(participant.name, fontSize)
-          
-          page.drawText(participant.name, {
-            x: (width - textWidth) / 2,
-            y: height / 2 - fontSize / 3,
-            size: fontSize,
-            font: font,
-            color: rgb(0.15, 0.15, 0.15),
-          })
-          
+          await drawCertificate(pdfDoc, imageBytes, isPng, participant.name, certStyle)
           const pdfBytes = await pdfDoc.save()
 
           // Construct email
@@ -111,7 +93,7 @@ export default function SendPage() {
             try {
               const parsed = JSON.parse(errorText);
               parsedError = parsed.error?.message || errorText;
-            } catch(e) {
+            } catch {
               parsedError = errorText;
             }
             throw new Error(`Gmail API Error: ${parsedError}`);

@@ -26,6 +26,10 @@ export interface CertEvent {
   template?: string
   templateDimensions?: { width: number; height: number }
   templateFont?: string
+  namePosition?: { x: number; y: number }
+  nameFontSize?: number
+  nameColor?: string
+  nameAlign?: 'center' | 'left' | 'right'
   emailSubject?: string
   emailBody?: string
 }

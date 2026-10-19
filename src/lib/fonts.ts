@@ -18,3 +18,24 @@ export async function embedSelectedFont(pdfDoc: PDFDocument, fontValue: string) 
   const option = FONT_OPTIONS.find(o => o.value === fontValue) || FONT_OPTIONS[0]
   return pdfDoc.embedFont(option.value as StandardFonts)
 }
+
+export function getFontFamilyCss(fontValue?: string): { fontFamily: string; fontWeight: 'bold' | 'normal' } {
+  const font = fontValue || 'Helvetica-Bold'
+  if (font.startsWith('Times')) {
+    return {
+      fontFamily: '"Times New Roman", Times, Georgia, serif',
+      fontWeight: font.includes('Bold') ? 'bold' : 'normal',
+    }
+  }
+  if (font.startsWith('Courier')) {
+    return {
+      fontFamily: '"Courier New", Courier, monospace',
+      fontWeight: font.includes('Bold') ? 'bold' : 'normal',
+    }
+  }
+  return {
+    fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    fontWeight: font.includes('Bold') ? 'bold' : 'normal',
+  }
+}
+

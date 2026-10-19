@@ -1,12 +1,12 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { PDFDocument, rgb } from 'pdf-lib'
+import { PDFDocument } from 'pdf-lib'
 import JSZip from 'jszip'
 import { saveAs } from 'file-saver'
 import { useStore } from '../../../../lib/store'
-import { embedSelectedFont } from '../../../../lib/fonts'
+import { drawCertificate, getDefaultCertificateStyle } from '../../../../lib/certificate'
 
 export default function GeneratePage() {
   const router = useRouter()
@@ -32,8 +32,8 @@ export default function GeneratePage() {
       const zip = new JSZip()
       
       // Parse template image type
-      const isPng = ev?.template?.startsWith('data:image/png')
-      const isJpg = ev?.template?.startsWith('data:image/jpeg') || ev?.template?.startsWith('data:image/jpg')
+      const isPng = Boolean(ev?.template?.startsWith('data:image/png'))
+      const isJpg = Boolean(ev?.template?.startsWith('data:image/jpeg') || ev?.template?.startsWith('data:image/jpg'))
       
       if (!isPng && !isJpg) {
         alert("Unsupported image format. Please use a PNG or JPG template.")
@@ -44,37 +44,13 @@ export default function GeneratePage() {
       // Fetch the base64 data as a blob and get array buffer
       const res = await fetch(ev!.template!)
       const imageBytes = await res.arrayBuffer()
+      const certStyle = getDefaultCertificateStyle(ev!)
       
       for (let i = 0; i < validParticipants.length; i++) {
         const participant = validParticipants[i]
         
         const pdfDoc = await PDFDocument.create()
-        const font = await embedSelectedFont(pdfDoc, ev!.templateFont || 'Helvetica-Bold')
-        
-        const img = isPng ? await pdfDoc.embedPng(imageBytes) : await pdfDoc.embedJpg(imageBytes)
-        
-        // Use image dimensions for page size
-        const { width, height } = img.scale(1)
-        const page = pdfDoc.addPage([width, height])
-        
-        page.drawImage(img, {
-          x: 0,
-          y: 0,
-          width: width,
-          height: height,
-        })
-        
-        // Draw the name in the center
-        const fontSize = Math.max(24, height * 0.08)
-        const textWidth = font.widthOfTextAtSize(participant.name, fontSize)
-        
-        page.drawText(participant.name, {
-          x: (width - textWidth) / 2,
-          y: height / 2 - fontSize / 3, // approximate center
-          size: fontSize,
-          font: font,
-          color: rgb(0.15, 0.15, 0.15), // Dark grey
-        })
+        await drawCertificate(pdfDoc, imageBytes, isPng, participant.name, certStyle)
         
         const pdfBytes = await pdfDoc.save()
         zip.file(`${participant.name.replace(/[^a-z0-9]/gi, '_')}_Certificate.pdf`, pdfBytes)

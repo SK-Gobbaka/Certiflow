@@ -1,7 +1,10 @@
 'use client'
 
+import { useRef, useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useStore } from '../../../../lib/store'
+import { getDefaultCertificateStyle } from '../../../../lib/certificate'
+import { getFontFamilyCss } from '../../../../lib/fonts'
 
 export default function ReviewPage() {
   const router = useRouter()
@@ -9,12 +12,36 @@ export default function ReviewPage() {
   const id = Array.isArray(params.id) ? params.id[0] : params.id || ''
   const { getEvent } = useStore()
   const ev = getEvent(id)
+  const previewRef = useRef<HTMLDivElement>(null)
+  const [renderedHeight, setRenderedHeight] = useState(250)
+
+  // Track rendered height to scale font size accurately
+  useEffect(() => {
+    if (!previewRef.current) return
+    const ro = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.contentRect.height > 0) {
+          setRenderedHeight(entry.contentRect.height)
+        }
+      }
+    })
+    ro.observe(previewRef.current)
+    return () => ro.disconnect()
+  }, [ev?.template])
 
   if (!ev) return null
 
   const list = ev.participants || []
   const validCount = list.filter((p) => p.status === 'valid').length
   const invalidCount = list.length - validCount
+
+  const certStyle = getDefaultCertificateStyle(ev)
+  const fontCss = getFontFamilyCss(certStyle.font)
+  const sampleParticipantName = list.find((p) => p.status === 'valid')?.name || 'Participant Name'
+
+  const templateHeight = ev.templateDimensions?.height || 1080
+  const previewScale = renderedHeight / templateHeight
+  const displayedFontSize = Math.max(10, Math.round(certStyle.fontSize * previewScale))
 
   return (
     <div>
@@ -57,18 +84,84 @@ export default function ReviewPage() {
 
         <div className="rounded-lg border border-line bg-paper p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-bold text-ink">Certificate Template</h3>
+            <h3 className="text-lg font-bold text-ink">Certificate Template & Placeholder</h3>
             <button onClick={() => router.push(`/event/${id}/certificate`)} className="text-seal text-sm font-medium hover:underline">
-              Edit
+              Adjust Position & Font
             </button>
           </div>
-          <div className="text-sm">
-            {ev.template ? (
-              <span className="font-medium text-ok">Template uploaded successfully</span>
-            ) : (
-              <span className="font-medium text-warn">No template uploaded</span>
-            )}
-          </div>
+
+          {ev.template ? (
+            <div className="space-y-4">
+              {/* Visual preview thumbnail with live placeholder overlay */}
+              <div className="flex justify-center rounded-lg border border-line/60 bg-page p-4">
+                <div ref={previewRef} className="relative inline-block overflow-hidden rounded shadow-sm max-w-full">
+                  <img
+                    src={ev.template}
+                    alt="Certificate Template Preview"
+                    className="block max-h-[260px] w-auto max-w-full object-contain pointer-events-none"
+                    onLoad={(e) => setRenderedHeight(e.currentTarget.clientHeight)}
+                  />
+                  <div
+                    className="absolute pointer-events-none"
+                    style={{
+                      left: `${certStyle.position.x}%`,
+                      top: `${certStyle.position.y}%`,
+                      transform:
+                        certStyle.align === 'center'
+                          ? 'translate(-50%, -50%)'
+                          : certStyle.align === 'right'
+                          ? 'translate(-100%, -50%)'
+                          : 'translate(0, -50%)',
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontFamily: fontCss.fontFamily,
+                        fontWeight: fontCss.fontWeight,
+                        fontSize: `${displayedFontSize}px`,
+                        color: certStyle.color,
+                        textAlign: certStyle.align,
+                        lineHeight: 1.1,
+                        whiteSpace: 'nowrap',
+                      }}
+                      className="bg-white/40 px-1 rounded shadow-xs"
+                    >
+                      {sampleParticipantName}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Style details summary */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                <div className="rounded border border-line p-2.5 bg-page">
+                  <div className="text-muted mb-0.5">Placeholder Position</div>
+                  <div className="font-medium font-mono text-ink">
+                    X: {certStyle.position.x.toFixed(1)}% | Y: {certStyle.position.y.toFixed(1)}%
+                  </div>
+                </div>
+                <div className="rounded border border-line p-2.5 bg-page">
+                  <div className="text-muted mb-0.5">Font & Size</div>
+                  <div className="font-medium text-ink">
+                    {certStyle.font.replace('-', ' ')} ({certStyle.fontSize}pt)
+                  </div>
+                </div>
+                <div className="rounded border border-line p-2.5 bg-page">
+                  <div className="text-muted mb-0.5">Color</div>
+                  <div className="flex items-center gap-1.5 font-medium text-ink">
+                    <span className="size-3.5 rounded-full border border-line" style={{ backgroundColor: certStyle.color }} />
+                    <span className="font-mono">{certStyle.color}</span>
+                  </div>
+                </div>
+                <div className="rounded border border-line p-2.5 bg-page">
+                  <div className="text-muted mb-0.5">Alignment</div>
+                  <div className="font-medium text-ink capitalize">{certStyle.align}</div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="text-sm font-medium text-warn">No template uploaded</div>
+          )}
         </div>
 
         <div className="rounded-lg border border-line bg-paper p-6">
