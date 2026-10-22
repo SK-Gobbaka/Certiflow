@@ -66,7 +66,7 @@ export async function drawCertificate(
   let x = (xPercent / 100) * width
   if (style.align === 'center') {
     x -= textWidth / 2
-  } else if (style.align === 'right') {
+  } else if (style.align === 'left') {
     x -= textWidth
   }
 

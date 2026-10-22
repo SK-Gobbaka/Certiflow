@@ -4,7 +4,7 @@ import { useRef, useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useStore } from '../../../../lib/store'
 import { getDefaultCertificateStyle } from '../../../../lib/certificate'
-import { getFontFamilyCss } from '../../../../lib/fonts'
+import { getFontFamilyCss, getFontLabel } from '../../../../lib/fonts'
 
 export default function ReviewPage() {
   const router = useRouter()
@@ -109,7 +109,7 @@ export default function ReviewPage() {
                       transform:
                         certStyle.align === 'center'
                           ? 'translate(-50%, -50%)'
-                          : certStyle.align === 'right'
+                          : certStyle.align === 'left'
                           ? 'translate(-100%, -50%)'
                           : 'translate(0, -50%)',
                     }}
@@ -143,7 +143,7 @@ export default function ReviewPage() {
                 <div className="rounded border border-line p-2.5 bg-page">
                   <div className="text-muted mb-0.5">Font & Size</div>
                   <div className="font-medium text-ink">
-                    {certStyle.font.replace('-', ' ')} ({certStyle.fontSize}pt)
+                    {getFontLabel(certStyle.font)} ({certStyle.fontSize}pt)
                   </div>
                 </div>
                 <div className="rounded border border-line p-2.5 bg-page">

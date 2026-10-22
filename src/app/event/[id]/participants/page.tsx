@@ -5,7 +5,7 @@ import type { DragEvent } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { saveAs } from 'file-saver'
 import { useStore } from '../../../../lib/store'
-import { parseParticipants, SAMPLE_CSV } from '../../../../lib/validate'
+import { parseParticipantsFromFile, SAMPLE_CSV } from '../../../../lib/validate'
 import type { RowStatus } from '../../../../types'
 
 type Filter = 'all' | RowStatus
@@ -43,11 +43,11 @@ export default function ParticipantsPage() {
   async function readFile(file: File | undefined) {
     if (!file) return
     setError('')
-    if (!/\.(csv|txt)$/i.test(file.name)) {
-      setError('Upload a .csv file. In Excel or Google Sheets, use File > Download > CSV.')
+    if (!/\.(csv|txt|xlsx|xls)$/i.test(file.name)) {
+      setError('Please upload a .csv or Excel (.xlsx, .xls) file.')
       return
     }
-    const res = parseParticipants(await file.text())
+    const res = await parseParticipantsFromFile(file)
     if (res.fatal) return setError(res.fatal)
     if (!res.participants.length) return setError('No rows found below the header row.')
     updateEvent(id, { participants: res.participants, columns: res.columns })
@@ -66,7 +66,7 @@ export default function ParticipantsPage() {
     <div>
       <h2 className="font-display text-2xl font-bold tracking-tight">Participants</h2>
       <p className="mt-1 text-muted">
-        Upload a CSV with <b>name</b> and <b>email</b> columns. <b>role</b> and <b>department</b> are optional, and any other column can be used as a placeholder later.
+        Upload a CSV or Excel sheet (.xlsx, .xls) with <b>name</b> and <b>email</b> columns. <b>role</b> and <b>department</b> are optional, and any other column can be used as a placeholder later.
       </p>
 
       <div
@@ -80,19 +80,27 @@ export default function ParticipantsPage() {
           drag ? 'border-seal bg-seal-soft' : 'border-line bg-paper'
         }`}
       >
-        <p className="font-medium">{list.length ? 'Replace the participant list' : 'Drop your CSV file here'}</p>
+        <p className="font-medium">{list.length ? 'Replace the participant list' : 'Drop your CSV or Excel file here'}</p>
+        <p className="mt-1 text-xs text-muted">Supports CSV (.csv) and Excel (.xlsx, .xls)</p>
         <div className="mt-3 flex flex-wrap justify-center gap-3">
           <button onClick={() => input.current?.click()} className="rounded-md bg-ink px-4 py-2 text-sm font-semibold text-white hover:brightness-125">
             Choose file
           </button>
           <button
+            type="button"
             onClick={() => saveAs(new Blob([SAMPLE_CSV], { type: 'text/csv' }), 'participants-sample.csv')}
             className="rounded-md border border-line px-4 py-2 text-sm font-medium hover:border-ink"
           >
-            Download sample CSV
+            Download sample template
           </button>
         </div>
-        <input ref={input} type="file" accept=".csv,text/csv" hidden onChange={(e) => readFile(e.target.files?.[0])} />
+        <input
+          ref={input}
+          type="file"
+          accept=".csv,text/csv,.xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
+          hidden
+          onChange={(e) => readFile(e.target.files?.[0])}
+        />
         {error && (
           <p role="alert" className="mt-4 text-sm font-medium text-seal">
             {error}

@@ -69,7 +69,7 @@ export default function LandingPage() {
             {
               step: '01',
               title: 'Upload Participants',
-              desc: 'Drop in a CSV with names and emails.'
+              desc: 'Drop in a CSV or Excel sheet with names and emails.'
             },
             {
               step: '02',
@@ -104,7 +104,7 @@ export default function LandingPage() {
         <div className="bg-paper rounded-2xl border border-line p-8 md:p-12 shadow-sm text-sm text-muted space-y-8 leading-relaxed">
           <div>
             <h3 className="font-bold text-ink text-lg mb-2">1. Anti-Spam Policy</h3>
-            <p className="text-base">You must have explicit permission to send emails to the participants listed in your CSV. Do not use CertiFlow to distribute unsolicited emails, spam, phishing links, or any malicious content. Doing so violates Google's API policies and will result in your account being restricted.</p>
+            <p className="text-base">You must have explicit permission to send emails to the participants listed in your CSV or Excel file. Do not use CertiFlow to distribute unsolicited emails, spam, phishing links, or any malicious content. Doing so violates Google's API policies and will result in your account being restricted.</p>
           </div>
           <div>
             <h3 className="font-bold text-ink text-lg mb-2">2. Gmail Rate Limits</h3>

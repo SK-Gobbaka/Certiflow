@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { DragEvent, PointerEvent } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useStore } from '../../../../lib/store'
-import { FONT_OPTIONS, getFontFamilyCss } from '../../../../lib/fonts'
+import { FONT_CATEGORIES, FONT_OPTIONS, getFontFamilyCss } from '../../../../lib/fonts'
 import { getDefaultCertificateStyle } from '../../../../lib/certificate'
 
 const COLOR_PRESETS = [
@@ -207,7 +207,7 @@ export default function CertificatePage() {
                     transform:
                       fontAlign === 'center'
                         ? 'translate(-50%, -50%)'
-                        : fontAlign === 'right'
+                        : fontAlign === 'left'
                         ? 'translate(-100%, -50%)'
                         : 'translate(0, -50%)',
                   }}
@@ -370,48 +370,63 @@ export default function CertificatePage() {
 
               {/* Font Family */}
               <div className="space-y-1.5">
-                <label htmlFor="fontSelect" className="text-xs font-medium text-ink block">
-                  Font Family
-                </label>
+                <div className="flex items-center justify-between">
+                  <label htmlFor="fontSelect" className="text-xs font-medium text-ink block">
+                    Font Family
+                  </label>
+                  <span className="text-[11px] text-muted">
+                    {FONT_OPTIONS.length} fonts
+                  </span>
+                </div>
                 <select
                   id="fontSelect"
                   value={fontVal}
                   onChange={(e) => updateEvent(id, { templateFont: e.target.value })}
                   className="w-full rounded-md border border-line bg-page px-3 py-2 text-xs font-medium text-ink focus:border-ink focus:outline-none"
                 >
-                  {FONT_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
+                  {FONT_CATEGORIES.map((cat) => (
+                    <optgroup key={cat.label} label={cat.label}>
+                      {cat.options.map((opt) => (
+                        <option
+                          key={opt.value}
+                          value={opt.value}
+                          style={{ fontFamily: opt.cssFamily }}
+                        >
+                          {opt.label}
+                        </option>
+                      ))}
+                    </optgroup>
                   ))}
                 </select>
               </div>
 
               {/* Font Size */}
               <div className="space-y-1.5">
-                <div className="flex justify-between text-xs">
-                  <label htmlFor="fontSizeSlider" className="font-medium text-ink">Font Size</label>
-                  <span className="font-mono text-muted">{fontSize} pt</span>
-                </div>
-                <div className="flex items-center gap-3">
+                <label htmlFor="fontSizeInput" className="text-xs font-medium text-ink block">
+                  Font Size (pt)
+                </label>
+                <div className="relative">
                   <input
-                    id="fontSizeSlider"
-                    type="range"
-                    min="16"
-                    max="140"
-                    step="1"
-                    value={fontSize}
-                    onChange={(e) => updateEvent(id, { nameFontSize: parseInt(e.target.value, 10) })}
-                    className="w-full accent-seal h-1.5 bg-line rounded-lg cursor-pointer"
-                  />
-                  <input
+                    id="fontSizeInput"
                     type="number"
-                    min="16"
-                    max="180"
-                    value={fontSize}
-                    onChange={(e) => updateEvent(id, { nameFontSize: parseInt(e.target.value, 10) || 40 })}
-                    className="w-16 rounded border border-line bg-page px-2 py-1 text-xs font-mono text-ink text-center"
+                    min="1"
+                    step="1"
+                    value={fontSize || ''}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value, 10)
+                      updateEvent(id, { nameFontSize: isNaN(val) ? 0 : val })
+                    }}
+                    onBlur={() => {
+                      if (!fontSize || fontSize < 8) {
+                        updateEvent(id, { nameFontSize: 40 })
+                      }
+                    }}
+                    placeholder="e.g. 140"
+                    className="w-full rounded-md border border-line bg-page px-3 py-2 pr-10 text-xs font-mono text-ink focus:border-ink focus:outline-none"
                   />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted pointer-events-none font-medium">
+                    pt
+                  </span>
                 </div>
               </div>
 
