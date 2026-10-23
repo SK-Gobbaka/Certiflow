@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { PDFDocument } from 'pdf-lib'
 import { useStore } from '../../../../lib/store'
-import { createMimeMessage } from '../../../../lib/email'
+import { createMimeMessage, replacePlaceholders } from '../../../../lib/email'
 import { drawCertificate, getDefaultCertificateStyle } from '../../../../lib/certificate'
 
 export default function SendPage() {
@@ -58,19 +58,18 @@ export default function SendPage() {
           await drawCertificate(pdfDoc, imageBytes, isPng, participant.name, certStyle)
           const pdfBytes = await pdfDoc.save()
 
-          // Construct email
-          const personalizedBody = (ev!.emailBody || '')
-            .replace(/{{name}}/g, participant.name)
-            .replace(/{{email}}/g, participant.email)
-            .replace(/{{role}}/g, participant.role || '');
+          // Personalize subject and body
+          const defaultSubject = `Your Certificate for ${ev!.name}`
+          const personalizedSubject = replacePlaceholders(ev!.emailSubject || defaultSubject, participant)
+          const personalizedBody = replacePlaceholders(ev!.emailBody || '', participant)
 
           const rawMsg = createMimeMessage(
             participant.email,
-            ev!.emailSubject || `Your Certificate for ${ev!.name}`,
+            personalizedSubject,
             personalizedBody,
             pdfBytes,
             `${participant.name.replace(/[^a-z0-9]/gi, '_')}_Certificate.pdf`
-          );
+          )
 
           // Send via Gmail API
           const gmailRes = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
@@ -80,23 +79,27 @@ export default function SendPage() {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({ raw: rawMsg })
-          });
+          })
 
           if (!gmailRes.ok) {
             if (gmailRes.status === 401) {
-              setToken(null);
-              throw new Error("Your session has expired. Please sign in again.");
+              setToken(null)
+              throw new Error("Your session has expired. Please sign in again.")
             }
-            const errorText = await gmailRes.text();
-            console.error("Gmail API Error:", errorText);
-            let parsedError = "Unknown error";
+            if (gmailRes.status === 429) {
+              // Temporary backoff on Gmail rate limit
+              await new Promise((resolve) => setTimeout(resolve, 2000))
+            }
+            const errorText = await gmailRes.text()
+            console.error("Gmail API Error:", errorText)
+            let parsedError = "Unknown error"
             try {
-              const parsed = JSON.parse(errorText);
-              parsedError = parsed.error?.message || errorText;
+              const parsed = JSON.parse(errorText)
+              parsedError = parsed.error?.message || errorText
             } catch {
-              parsedError = errorText;
+              parsedError = errorText
             }
-            throw new Error(`Gmail API Error: ${parsedError}`);
+            throw new Error(`Gmail API Error: ${parsedError}`)
           }
 
           setSentCount((prev) => prev + 1)

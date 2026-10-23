@@ -7,13 +7,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "oxlint",
+    "test": "node --test"
   },
   "dependencies": {
     "@pdf-lib/fontkit": "^1.1.1",
     "@react-oauth/google": "^0.13.5",
     "@tailwindcss/postcss": "^4.3.3",
-    "@tailwindcss/vite": "^4.3.3",
     "file-saver": "^2.0.5",
     "jszip": "^3.10.2",
     "next": "^16.3.5",

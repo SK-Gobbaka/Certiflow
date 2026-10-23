@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useGoogleLogin } from '@react-oauth/google'
 import { useStore } from '../lib/store'
 
@@ -155,6 +156,14 @@ export default function LandingPage() {
           <div className="text-center md:text-left">
             <p>© {new Date().getFullYear()} CertiFlow. All rights reserved.</p>
             <p className="text-xs mt-1">Built for speed, security, and simplicity.</p>
+          </div>
+          <div className="flex items-center gap-6 text-xs mt-4 md:mt-0">
+            <Link href="/terms" className="hover:text-ink transition-colors">
+              Terms of Service
+            </Link>
+            <Link href="/privacy" className="hover:text-ink transition-colors">
+              Privacy Policy
+            </Link>
           </div>
         </div>
       </footer>

@@ -67,8 +67,10 @@ export default function CertificatePage() {
   function handleFile(file: File | undefined) {
     if (!file) return
     setError('')
-    if (!file.type.startsWith('image/')) {
-      setError('Please upload an image file (PNG, JPG, etc).')
+    const isPng = file.type === 'image/png' || /\.png$/i.test(file.name)
+    const isJpg = file.type === 'image/jpeg' || file.type === 'image/jpg' || /\.(jpe?g)$/i.test(file.name)
+    if (!isPng && !isJpg) {
+      setError('Please upload a PNG or JPG certificate template image.')
       return
     }
 
@@ -538,7 +540,7 @@ export default function CertificatePage() {
         </div>
       )}
 
-      <input ref={fileInputRef} type="file" accept="image/*" hidden onChange={(e) => handleFile(e.target.files?.[0])} />
+      <input ref={fileInputRef} type="file" accept="image/png,image/jpeg" hidden onChange={(e) => handleFile(e.target.files?.[0])} />
 
       {error && (
         <p role="alert" className="mt-4 text-center text-sm font-medium text-seal">

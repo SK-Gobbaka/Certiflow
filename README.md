@@ -1,32 +1,36 @@
-# React + TypeScript + Vite
+# CertiFlow
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Automate certificate generation and personalized email dispatch directly from your browser via Gmail API.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Client-Side Processing**: Zero server storage. Certificates and participant data are processed locally in your browser.
+- **Participant Import**: Parse CSV and Excel (`.xlsx`, `.xls`) files with automatic email validation, deduplication, and custom column placeholder extraction.
+- **Visual Certificate Designer**: Drag-and-drop name placeholder placement, custom fonts, typography sizes, colors, and live certificate preview.
+- **Personalized Email Templates**: Dynamic placeholders (`{{name}}`, `{{email}}`, `{{role}}`, `{{department}}`, and custom CSV columns) for email subject and body.
+- **Batch Dispatch & Export**: Send emails directly through your Google account via the Gmail API with rate-limiting protection, or download all generated certificates in a single ZIP file.
 
-## React Compiler
+## Getting Started
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+1. Set up your environment variable:
+   Create a `.env.local` file:
+   ```env
+   NEXT_PUBLIC_GOOGLE_CLIENT_ID=your-google-oauth-client-id.apps.googleusercontent.com
+   ```
 
-## Expanding the Oxlint configuration
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+3. Run the development server:
+   ```bash
+   npm run dev
+   ```
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
-```
-
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+4. Scripts:
+   - `npm run dev`: Start Next.js development server
+   - `npm run build`: Production build
+   - `npm run start`: Start production server
+   - `npm run lint`: Lint with Oxlint
+   - `npm test`: Run unit tests

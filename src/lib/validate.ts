@@ -4,7 +4,7 @@ import type { Participant } from '../types'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
 
-const norm = (s: string) => s.trim().toLowerCase().replace(/[\s-]+/g, '_')
+const norm = (s: string) => s.replace(/^\uFEFF/, '').trim().toLowerCase().replace(/[\s-]+/g, '_')
 
 export interface ParseResult {
   participants: Participant[]

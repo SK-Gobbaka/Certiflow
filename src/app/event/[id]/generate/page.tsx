@@ -46,6 +46,7 @@ export default function GeneratePage() {
       const imageBytes = await res.arrayBuffer()
       const certStyle = getDefaultCertificateStyle(ev!)
       
+      const filenameCounts = new Map<string, number>()
       for (let i = 0; i < validParticipants.length; i++) {
         const participant = validParticipants[i]
         
@@ -53,7 +54,11 @@ export default function GeneratePage() {
         await drawCertificate(pdfDoc, imageBytes, isPng, participant.name, certStyle)
         
         const pdfBytes = await pdfDoc.save()
-        zip.file(`${participant.name.replace(/[^a-z0-9]/gi, '_')}_Certificate.pdf`, pdfBytes)
+        const baseName = `${participant.name.replace(/[^a-z0-9]/gi, '_') || 'Participant'}_Certificate`
+        const count = filenameCounts.get(baseName) || 0
+        filenameCounts.set(baseName, count + 1)
+        const filename = count > 0 ? `${baseName}_${count + 1}.pdf` : `${baseName}.pdf`
+        zip.file(filename, pdfBytes)
         
         setProgress(Math.round(((i + 1) / validParticipants.length) * 100))
       }

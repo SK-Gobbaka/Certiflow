@@ -27,16 +27,20 @@ export default function ParticipantsPage() {
   const [drag, setDrag] = useState(false)
   const [filter, setFilter] = useState<Filter>('all')
 
-  const list = ev?.participants ?? []
+  const participants = ev?.participants
   const counts = useMemo(
-    () => ({
-      all: list.length,
-      valid: list.filter((p) => p.status === 'valid').length,
-      invalid: list.filter((p) => p.status === 'invalid').length,
-      duplicate: list.filter((p) => p.status === 'duplicate').length,
-    }),
-    [list],
+    () => {
+      const items = participants ?? []
+      return {
+        all: items.length,
+        valid: items.filter((p) => p.status === 'valid').length,
+        invalid: items.filter((p) => p.status === 'invalid').length,
+        duplicate: items.filter((p) => p.status === 'duplicate').length,
+      }
+    },
+    [participants],
   )
+  const list = participants ?? []
 
   if (!ev) return null
 
